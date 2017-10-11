@@ -24,10 +24,10 @@ test_that("print() method works", {
 
 test_that("coef() method works", {
   ridgereg_mod <- ridgereg$new(Petal.Length~Sepal.Width+Sepal.Length, data=iris, lambda = 1)
-  ridge_coef <- round(as.numeric(ridgereg_mod$coef()))
+  ridge_coef <- round(as.numeric(ridgereg_mod$coef()),2)
   
   lm.ridge_mod <- MASS::lm.ridge(Petal.Length~Sepal.Width+Sepal.Length, data=iris, lambda = 1)
-  lm_coef <- round(as.numeric(lm.ridge_mod$coef))
+  lm_coef <- round(as.numeric(lm.ridge_mod$coef),2)
   
   is_equivalent_to(lm_coef,ridge_coef)
 })

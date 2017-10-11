@@ -8,8 +8,6 @@
 #'@exportClass ridgereg
 #'@export ridgereg
 #
-#formula=Petal.Length~Sepal.Width+Sepal.Length
-#data=iris
 #ridgereg_mod <- ridgereg$new(Petal.Length~Sepal.Width+Sepal.Length, data=iris, lambda = 1)
 
 ridgereg <- setRefClass("ridgereg", 
@@ -17,11 +15,6 @@ ridgereg <- setRefClass("ridgereg",
                                       data="data.frame",
                                       reg_coe="matrix",
                                       fit_val="matrix",
-                                      residu="matrix",
-                                      dof="numeric",
-                                      res_var="matrix",
-                                      var_reg_coe="numeric",
-                                      t_val="matrix",
                                       data_name="character",
                                       lambda="numeric"),
                         
@@ -40,17 +33,30 @@ ridgereg <- setRefClass("ridgereg",
                             #defining X and y
                             y <- data[[get_y]]
                             X <- model.matrix(formula, data)
-                       
+                            
                             #Normalize
                             p <- ncol(X)
                             X <- cbind(X[,1], scale(X[,-1]))
-                          
+                            
                             #Ridge regression
-                            reg_coe <<- solve(t(X)%*%X+lambda*diag(p)) %*% t(X)%*%y
+                            # reg_coe <<- solve(t(X)%*%X+lambda*diag(p)) %*% t(X)%*%y
+                            # dimnames(reg_coe) <<- list(c("(Intercept)", all.vars(formula)[-1]), NULL)
+
+                            # fit_val <<- X%*%reg_coe
+                            
+                            #QR Decomposition
+                            y<-as.matrix(data[get_y],ncol=1)
+                            X_qr<-rbind(X,sqrt(lambda)*diag(p))
+                            y_qr<-rbind(y,matrix(data = 0, nrow = p, ncol = 1))
+                            
+                            QR <- qr((X_qr))
+                            Q <- qr.Q(QR)
+                            R <- qr.R(QR)
+                            
+                            reg_coe <<- qr.solve(R) %*% t(Q) %*% as.matrix(y_qr)
                             dimnames(reg_coe) <<- list(c("(Intercept)", all.vars(formula)[-1]), NULL)
                             
-                            fit_val <<- X%*%reg_coe
-                            
+                            fit_val <<- X %*% reg_coe
                           },
                           
                           print = function(){
@@ -63,7 +69,7 @@ ridgereg <- setRefClass("ridgereg",
                             cat(t(reg_coe[,1]), sep="    ")
                             
                           },
-
+                          
                           predict = function(){
                             "Return the predicted values y_hat"
                             return(fit_val)

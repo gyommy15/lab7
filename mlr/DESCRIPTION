@@ -1,11 +1,12 @@
 Package: mlr
 Type: Package
-Title: What the package does (short line)
+Title: mlr package utilizes the function ridgereg() and linreg() to conduct regression
 Version: 1.0
 Date: 2017-10-10
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: More about what it does (maybe more than one line)
-License: What license is it under?
+Author: Josh Hyungyum Kim
+Maintainer: Josh Hyungyum Kim <gyommy15@gmail.com>
+Description: linreg() function conducts multiple linear regression with OLS method and ridgereg() function conducts with ridge regression with QR decomposition method.
+License: MIT + file LICENSE
 Suggests: testthat
 RoxygenNote: 6.0.1
+LazyData: TRUE

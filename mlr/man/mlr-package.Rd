@@ -3,18 +3,13 @@
 \alias{mlr}
 \docType{package}
 \title{
-\packageTitle{mlr}
+mlr packagae
 }
 \description{
 \packageDescription{mlr}
 }
 \details{
-
-The DESCRIPTION file:
-\packageDESCRIPTION{mlr}
-\packageIndices{mlr}
-~~ An overview of how to use the package, ~~
-~~ including the most important functions ~~
+More details can be found on package vignette.
 }
 \author{
 \packageAuthor{mlr}
@@ -22,16 +17,23 @@ The DESCRIPTION file:
 Maintainer: \packageMaintainer{mlr}
 }
 \references{
-~~ Literature or other references for background information ~~
+\url{http://math.stackexchange.com/questions/299481/qr-factorization-for-ridge-regression}
 }
-~~ Optionally other standard keywords, one per ~~
-~~ line, from file KEYWORDS in the R ~~
-~~ documentation directory ~~
+
 \keyword{ package }
+
 \seealso{
-~~ Optional links to other man pages, e.g. ~~
-~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
-}
+\url{https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf}  
+ 
+\url{http://topepo.github.io/caret/Linear Regression.html}  
+ 
+\url{http://topepo.github.io/caret/custom models.html}  
+ 
+\url{https://cran.r-project.org/web/packages/caret/vignettes/caret.pdf}   
+ 
+\url{http://topepo.github.io/caret/training.html}   
+}  
+
 \examples{
-~~ simple examples of the most important functions ~~
+ridgereg_mod <- ridgereg$new(Petal.Length~Sepal.Width+Sepal.Length, data=iris, lambda = 1)
 }
