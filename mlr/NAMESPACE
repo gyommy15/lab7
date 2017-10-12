@@ -2,5 +2,8 @@
 
 export(linreg)
 export(ridgereg)
+export(visualize_airport_delays)
 exportClasses(linreg)
 exportClasses(ridgereg)
+import(nycflights13)
+importFrom(methods,new)

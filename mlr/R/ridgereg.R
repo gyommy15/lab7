@@ -5,6 +5,7 @@
 #'@param formula Contains dependent and independent variables for linear regression
 #'@param data A data.frame to conduct linear regression
 #'
+#'@importFrom methods new
 #'@exportClass ridgereg
 #'@export ridgereg
 #
