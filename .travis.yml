@@ -1,0 +1,8 @@
+language: r
+cache: packages
+
+before_install:
+ - cd mlr
+
+notifications:
+  email: false
