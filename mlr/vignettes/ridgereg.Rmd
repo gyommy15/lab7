@@ -17,9 +17,27 @@ knitr::opts_chunk$set(
 ```
 
 ```{r}
-require(mlr)
-require(mlbench)
-require(caret)
+library(mlbench)
+library(caret)
+data(BostonHousing)
+```
+In this vignette, it will be shown how to do a simple prediction problem using ridgereg() function in the package "mlr" with the data _BostonHousing_ found in the mlbench package.
+
+```{r}
+head(BostonHousing)
 ```
 
-In this vignette, it will be shown how to do a simple prediction problem using ridgereg() function in the package "mlr" with the data _BostonHousing_ found in the mlbench package.
+
+###1. Divide the BostonHousing data into a test and training dataset
+```{r}
+inTraining <- caret::createDataPartition(BostonHousing$crim, p = .7, list = FALSE)
+training <- BostonHousing[ inTraining,]
+testing  <- BostonHousing[-inTraining,]
+
+fitControl <- caret::trainControl(## 10-fold CV
+  method = "repeatedcv",
+  number = 10,
+  ## repeated ten times
+  repeats = 10)
+```
+

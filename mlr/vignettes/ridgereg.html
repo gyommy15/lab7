@@ -74,17 +74,39 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">require</span>(mlr)
-<span class="co">#&gt; Loading required package: mlr</span>
-<span class="kw">require</span>(mlbench)
-<span class="co">#&gt; Loading required package: mlbench</span>
-<span class="co">#&gt; Warning: package 'mlbench' was built under R version 3.4.2</span>
-<span class="kw">require</span>(caret)
-<span class="co">#&gt; Loading required package: caret</span>
-<span class="co">#&gt; Warning: package 'caret' was built under R version 3.4.2</span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(mlbench)
+<span class="kw">library</span>(caret)
 <span class="co">#&gt; Loading required package: lattice</span>
-<span class="co">#&gt; Loading required package: ggplot2</span></code></pre></div>
+<span class="co">#&gt; Loading required package: ggplot2</span>
+<span class="kw">data</span>(BostonHousing)</code></pre></div>
 <p>In this vignette, it will be shown how to do a simple prediction problem using ridgereg() function in the package “mlr” with the data <em>BostonHousing</em> found in the mlbench package.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(BostonHousing)
+<span class="co">#&gt;      crim zn indus chas   nox    rm  age    dis rad tax ptratio      b</span>
+<span class="co">#&gt; 1 0.00632 18  2.31    0 0.538 6.575 65.2 4.0900   1 296    15.3 396.90</span>
+<span class="co">#&gt; 2 0.02731  0  7.07    0 0.469 6.421 78.9 4.9671   2 242    17.8 396.90</span>
+<span class="co">#&gt; 3 0.02729  0  7.07    0 0.469 7.185 61.1 4.9671   2 242    17.8 392.83</span>
+<span class="co">#&gt; 4 0.03237  0  2.18    0 0.458 6.998 45.8 6.0622   3 222    18.7 394.63</span>
+<span class="co">#&gt; 5 0.06905  0  2.18    0 0.458 7.147 54.2 6.0622   3 222    18.7 396.90</span>
+<span class="co">#&gt; 6 0.02985  0  2.18    0 0.458 6.430 58.7 6.0622   3 222    18.7 394.12</span>
+<span class="co">#&gt;   lstat medv</span>
+<span class="co">#&gt; 1  4.98 24.0</span>
+<span class="co">#&gt; 2  9.14 21.6</span>
+<span class="co">#&gt; 3  4.03 34.7</span>
+<span class="co">#&gt; 4  2.94 33.4</span>
+<span class="co">#&gt; 5  5.33 36.2</span>
+<span class="co">#&gt; 6  5.21 28.7</span></code></pre></div>
+<div id="divide-the-bostonhousing-data-into-a-test-and-training-dataset" class="section level3">
+<h3>1. Divide the BostonHousing data into a test and training dataset</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">inTraining &lt;-<span class="st"> </span>caret::<span class="kw">createDataPartition</span>(BostonHousing$crim, <span class="dt">p =</span> .<span class="dv">7</span>, <span class="dt">list =</span> <span class="ot">FALSE</span>)
+training &lt;-<span class="st"> </span>BostonHousing[ inTraining,]
+testing  &lt;-<span class="st"> </span>BostonHousing[-inTraining,]
+
+fitControl &lt;-<span class="st"> </span>caret::<span class="kw">trainControl</span>(## 10-fold CV
+  <span class="dt">method =</span> <span class="st">&quot;repeatedcv&quot;</span>,
+  <span class="dt">number =</span> <span class="dv">10</span>,
+  ## repeated ten times
+  <span class="dt">repeats =</span> <span class="dv">10</span>)</code></pre></div>
+</div>
 
 
 
