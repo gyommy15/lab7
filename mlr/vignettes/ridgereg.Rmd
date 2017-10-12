@@ -1,0 +1,25 @@
+---
+title: "ridgereg"
+author: "Josh Hyungyum Kim"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r}
+require(mlr)
+require(mlbench)
+require(caret)
+```
+
+In this vignette, it will be shown how to do a simple prediction problem using ridgereg() function in the package "mlr" with the data _BostonHousing_ found in the mlbench package.

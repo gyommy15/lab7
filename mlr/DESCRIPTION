@@ -7,7 +7,10 @@ Author: Josh Hyungyum Kim
 Maintainer: Josh Hyungyum Kim <gyommy15@gmail.com>
 Description: linreg() function conducts multiple linear regression with OLS method and ridgereg() function conducts with ridge regression with QR decomposition method.
 License: MIT + file LICENSE
-Suggests: testthat
+Suggests: testthat,
+    knitr,
+    rmarkdown
 Imports: dplyr, ggplot2 (>= 1.0.0), nycflights13, mlbench, caret, methods
 RoxygenNote: 6.0.1
 LazyData: TRUE
+VignetteBuilder: knitr
