@@ -12,7 +12,7 @@
 
 <meta name="author" content="Josh Hyungyum Kim" />
 
-<meta name="date" content="2017-10-12" />
+<meta name="date" content="2017-10-13" />
 
 <title>ridgereg</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">ridgereg</h1>
 <h4 class="author"><em>Josh Hyungyum Kim</em></h4>
-<h4 class="date"><em>2017-10-12</em></h4>
+<h4 class="date"><em>2017-10-13</em></h4>
 
 
 
@@ -79,7 +79,26 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="co">#&gt; Loading required package: lattice</span>
 <span class="co">#&gt; Loading required package: ggplot2</span>
 <span class="kw">data</span>(BostonHousing)</code></pre></div>
-<p>In this vignette, it will be shown how to do a simple prediction problem using ridgereg() function in the package “mlr” with the data <em>BostonHousing</em> found in the mlbench package.</p>
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>In this vignette, it will be shown how to do a simple prediction problem using ridgereg() function in the package “mlr” with the data <em>BostonHousing</em> found in the mlbench package. The dataset consists of 506 observations of 14 variables. The median value of house price in $1000s, denoted by MEDV, is the outcome or the target variable in our model. Below is a brief description of each feature and the outcome in our dataset:</p>
+<ol style="list-style-type: decimal">
+<li>CRIM --- per capita crime rate by town</li>
+<li>ZN --- proportion of residential land zoned for lots over 25,000 sq.ft</li>
+<li>INDUS --- proportion of non-retail business acres per town</li>
+<li>CHAS --- Charles River dummy variable (1 if tract bounds river; else 0)</li>
+<li>NOX --- nitric oxides concentration (parts per 10 million)</li>
+<li>RM --- average number of rooms per dwelling</li>
+<li>AGE --- proportion of owner-occupied units built prior to 1940</li>
+<li>DIS --- weighted distances to five Boston employment centres</li>
+<li>RAD --- index of accessibility to radial highways</li>
+<li>TAX --- full-value property-tax rate per $10,000</li>
+<li>PTRATIO --- pupil-teacher ratio by town</li>
+<li>B --- 1000(Bk - 0.63)^2 where Bk is the proportion of blacks by town</li>
+<li>LSTAT --- % lower status of the population</li>
+<li>MEDV --- Median value of owner-occupied homes in $1000’s</li>
+</ol>
+<p>First 6 rows of the dataset are shown below:</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(BostonHousing)
 <span class="co">#&gt;      crim zn indus chas   nox    rm  age    dis rad tax ptratio      b</span>
 <span class="co">#&gt; 1 0.00632 18  2.31    0 0.538 6.575 65.2 4.0900   1 296    15.3 396.90</span>
@@ -97,15 +116,110 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="co">#&gt; 6  5.21 28.7</span></code></pre></div>
 <div id="divide-the-bostonhousing-data-into-a-test-and-training-dataset" class="section level3">
 <h3>1. Divide the BostonHousing data into a test and training dataset</h3>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">inTraining &lt;-<span class="st"> </span>caret::<span class="kw">createDataPartition</span>(BostonHousing$crim, <span class="dt">p =</span> .<span class="dv">7</span>, <span class="dt">list =</span> <span class="ot">FALSE</span>)
-training &lt;-<span class="st"> </span>BostonHousing[ inTraining,]
-testing  &lt;-<span class="st"> </span>BostonHousing[-inTraining,]
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">12345</span>)
+inTrain &lt;-<span class="st"> </span><span class="kw">createDataPartition</span>(BostonHousing$medv, <span class="dt">p =</span> .<span class="dv">8</span>, <span class="dt">list =</span> <span class="ot">FALSE</span>)
+training &lt;-<span class="st"> </span>BostonHousing[ inTrain,]
+testing  &lt;-<span class="st"> </span>BostonHousing[-inTrain,]
 
-fitControl &lt;-<span class="st"> </span>caret::<span class="kw">trainControl</span>(## 10-fold CV
-  <span class="dt">method =</span> <span class="st">&quot;repeatedcv&quot;</span>,
-  <span class="dt">number =</span> <span class="dv">10</span>,
-  ## repeated ten times
-  <span class="dt">repeats =</span> <span class="dv">10</span>)</code></pre></div>
+<span class="co">#For the 10-fold cross-validation</span>
+ctrl &lt;-<span class="st"> </span><span class="kw">trainControl</span>(<span class="dt">method =</span> <span class="st">&quot;repeatedcv&quot;</span>,
+  <span class="dt">number =</span> <span class="dv">10</span>, <span class="co"># k=10</span>
+  <span class="dt">repeats =</span> <span class="dv">10</span>) <span class="co"># repeat 10 times</span></code></pre></div>
+</div>
+<div id="fit-a-linear-regression-model." class="section level3">
+<h3>2-1) Fit a linear regression model.</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">12345</span>)
+lm &lt;-<span class="st"> </span><span class="kw">train</span>(medv ~<span class="st"> </span>., 
+            <span class="dt">data =</span> training,
+            <span class="dt">method =</span> <span class="st">&quot;lm&quot;</span>,
+            <span class="dt">trControl =</span> ctrl,
+            <span class="dt">preProc =</span> <span class="st">&quot;scale&quot;</span>)
+lm
+<span class="co">#&gt; Linear Regression </span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; 407 samples</span>
+<span class="co">#&gt;  13 predictor</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Pre-processing: scaled (13) </span>
+<span class="co">#&gt; Resampling: Cross-Validated (10 fold, repeated 10 times) </span>
+<span class="co">#&gt; Summary of sample sizes: 367, 366, 365, 367, 366, 367, ... </span>
+<span class="co">#&gt; Resampling results:</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;   RMSE      Rsquared   MAE     </span>
+<span class="co">#&gt;   4.597562  0.7481491  3.284981</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Tuning parameter 'intercept' was held constant at a value of TRUE</span></code></pre></div>
+</div>
+<div id="fit-a-linear-regression-model-with-forward-selection." class="section level3">
+<h3>2-2) Fit a linear regression model with forward selection.</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">12345</span>)
+lmGrid &lt;-<span class="st">  </span><span class="kw">expand.grid</span>(<span class="dt">nvmax=</span><span class="dv">1</span>:(<span class="kw">ncol</span>(training)-<span class="dv">1</span>))
+lflm &lt;-<span class="st"> </span><span class="kw">train</span>(medv ~<span class="st"> </span>., 
+              <span class="dt">data =</span> training,
+              <span class="dt">method =</span> <span class="st">'leapForward'</span>,
+              <span class="dt">trControl =</span> ctrl,
+              <span class="dt">tuneGrid =</span> lmGrid,
+              <span class="dt">preProc =</span> <span class="st">&quot;scale&quot;</span>)
+
+lflm
+<span class="co">#&gt; Linear Regression with Forward Selection </span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; 407 samples</span>
+<span class="co">#&gt;  13 predictor</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Pre-processing: scaled (13) </span>
+<span class="co">#&gt; Resampling: Cross-Validated (10 fold, repeated 10 times) </span>
+<span class="co">#&gt; Summary of sample sizes: 367, 366, 365, 367, 366, 367, ... </span>
+<span class="co">#&gt; Resampling results across tuning parameters:</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;   nvmax  RMSE      Rsquared   MAE     </span>
+<span class="co">#&gt;    1     6.390444  0.5197564  4.557756</span>
+<span class="co">#&gt;    2     5.340344  0.6652904  3.883566</span>
+<span class="co">#&gt;    3     4.936366  0.7103948  3.568594</span>
+<span class="co">#&gt;    4     4.784228  0.7275599  3.393154</span>
+<span class="co">#&gt;    5     4.773528  0.7283479  3.364001</span>
+<span class="co">#&gt;    6     4.630357  0.7434321  3.315285</span>
+<span class="co">#&gt;    7     4.635527  0.7425878  3.307798</span>
+<span class="co">#&gt;    8     4.677107  0.7384397  3.336058</span>
+<span class="co">#&gt;    9     4.628257  0.7443394  3.304361</span>
+<span class="co">#&gt;   10     4.594354  0.7477233  3.281964</span>
+<span class="co">#&gt;   11     4.598456  0.7480112  3.287581</span>
+<span class="co">#&gt;   12     4.598151  0.7480760  3.285110</span>
+<span class="co">#&gt;   13     4.597562  0.7481491  3.284981</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; RMSE was used to select the optimal model using  the smallest value.</span>
+<span class="co">#&gt; The final value used for the model was nvmax = 10.</span>
+<span class="kw">summary</span>(lflm)
+<span class="co">#&gt; Subset selection object</span>
+<span class="co">#&gt; 13 Variables  (and intercept)</span>
+<span class="co">#&gt;         Forced in Forced out</span>
+<span class="co">#&gt; crim        FALSE      FALSE</span>
+<span class="co">#&gt; zn          FALSE      FALSE</span>
+<span class="co">#&gt; indus       FALSE      FALSE</span>
+<span class="co">#&gt; chas1       FALSE      FALSE</span>
+<span class="co">#&gt; nox         FALSE      FALSE</span>
+<span class="co">#&gt; rm          FALSE      FALSE</span>
+<span class="co">#&gt; age         FALSE      FALSE</span>
+<span class="co">#&gt; dis         FALSE      FALSE</span>
+<span class="co">#&gt; rad         FALSE      FALSE</span>
+<span class="co">#&gt; tax         FALSE      FALSE</span>
+<span class="co">#&gt; ptratio     FALSE      FALSE</span>
+<span class="co">#&gt; b           FALSE      FALSE</span>
+<span class="co">#&gt; lstat       FALSE      FALSE</span>
+<span class="co">#&gt; 1 subsets of each size up to 10</span>
+<span class="co">#&gt; Selection Algorithm: forward</span>
+<span class="co">#&gt;           crim zn  indus chas1 nox rm  age dis rad tax ptratio b   lstat</span>
+<span class="co">#&gt; 1  ( 1 )  &quot; &quot;  &quot; &quot; &quot; &quot;   &quot; &quot;   &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot;     &quot; &quot; &quot;*&quot;  </span>
+<span class="co">#&gt; 2  ( 1 )  &quot; &quot;  &quot; &quot; &quot; &quot;   &quot; &quot;   &quot; &quot; &quot;*&quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot;     &quot; &quot; &quot;*&quot;  </span>
+<span class="co">#&gt; 3  ( 1 )  &quot; &quot;  &quot; &quot; &quot; &quot;   &quot; &quot;   &quot; &quot; &quot;*&quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot;*&quot;     &quot; &quot; &quot;*&quot;  </span>
+<span class="co">#&gt; 4  ( 1 )  &quot; &quot;  &quot; &quot; &quot; &quot;   &quot; &quot;   &quot; &quot; &quot;*&quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot;*&quot;     &quot;*&quot; &quot;*&quot;  </span>
+<span class="co">#&gt; 5  ( 1 )  &quot; &quot;  &quot; &quot; &quot; &quot;   &quot; &quot;   &quot; &quot; &quot;*&quot; &quot; &quot; &quot;*&quot; &quot; &quot; &quot; &quot; &quot;*&quot;     &quot;*&quot; &quot;*&quot;  </span>
+<span class="co">#&gt; 6  ( 1 )  &quot; &quot;  &quot; &quot; &quot; &quot;   &quot; &quot;   &quot;*&quot; &quot;*&quot; &quot; &quot; &quot;*&quot; &quot; &quot; &quot; &quot; &quot;*&quot;     &quot;*&quot; &quot;*&quot;  </span>
+<span class="co">#&gt; 7  ( 1 )  &quot; &quot;  &quot;*&quot; &quot; &quot;   &quot; &quot;   &quot;*&quot; &quot;*&quot; &quot; &quot; &quot;*&quot; &quot; &quot; &quot; &quot; &quot;*&quot;     &quot;*&quot; &quot;*&quot;  </span>
+<span class="co">#&gt; 8  ( 1 )  &quot; &quot;  &quot;*&quot; &quot; &quot;   &quot; &quot;   &quot;*&quot; &quot;*&quot; &quot; &quot; &quot;*&quot; &quot; &quot; &quot;*&quot; &quot;*&quot;     &quot;*&quot; &quot;*&quot;  </span>
+<span class="co">#&gt; 9  ( 1 )  &quot; &quot;  &quot;*&quot; &quot; &quot;   &quot; &quot;   &quot;*&quot; &quot;*&quot; &quot; &quot; &quot;*&quot; &quot;*&quot; &quot;*&quot; &quot;*&quot;     &quot;*&quot; &quot;*&quot;  </span>
+<span class="co">#&gt; 10  ( 1 ) &quot;*&quot;  &quot;*&quot; &quot; &quot;   &quot; &quot;   &quot;*&quot; &quot;*&quot; &quot; &quot; &quot;*&quot; &quot;*&quot; &quot;*&quot; &quot;*&quot;     &quot;*&quot; &quot;*&quot;</span></code></pre></div>
+</div>
 </div>
 
 
