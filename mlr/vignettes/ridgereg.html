@@ -153,12 +153,10 @@ lm
 <div id="fit-a-linear-regression-model-with-forward-selection." class="section level3">
 <h3>2-2. Fit a linear regression model with forward selection.</h3>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">12345</span>)
-lmGrid &lt;-<span class="st">  </span><span class="kw">expand.grid</span>(<span class="dt">nvmax=</span><span class="dv">1</span>:(<span class="kw">ncol</span>(training)-<span class="dv">1</span>))
 lflm &lt;-<span class="st"> </span><span class="kw">train</span>(medv ~<span class="st"> </span>., 
               <span class="dt">data =</span> training,
               <span class="dt">method =</span> <span class="st">'leapForward'</span>,
               <span class="dt">trControl =</span> ctrl,
-              <span class="dt">tuneGrid =</span> lmGrid,
               <span class="dt">preProc =</span> <span class="st">&quot;scale&quot;</span>)
 
 lflm
@@ -173,22 +171,12 @@ lflm
 <span class="co">#&gt; Resampling results across tuning parameters:</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;   nvmax  RMSE      Rsquared   MAE     </span>
-<span class="co">#&gt;    1     6.390444  0.5197564  4.557756</span>
-<span class="co">#&gt;    2     5.340344  0.6652904  3.883566</span>
-<span class="co">#&gt;    3     4.936366  0.7103948  3.568594</span>
-<span class="co">#&gt;    4     4.784228  0.7275599  3.393154</span>
-<span class="co">#&gt;    5     4.773528  0.7283479  3.364001</span>
-<span class="co">#&gt;    6     4.630357  0.7434321  3.315285</span>
-<span class="co">#&gt;    7     4.635527  0.7425878  3.307798</span>
-<span class="co">#&gt;    8     4.677107  0.7384397  3.336058</span>
-<span class="co">#&gt;    9     4.628257  0.7443394  3.304361</span>
-<span class="co">#&gt;   10     4.594354  0.7477233  3.281964</span>
-<span class="co">#&gt;   11     4.598456  0.7480112  3.287581</span>
-<span class="co">#&gt;   12     4.598151  0.7480760  3.285110</span>
-<span class="co">#&gt;   13     4.597562  0.7481491  3.284981</span>
+<span class="co">#&gt;   2      5.340344  0.6652904  3.883566</span>
+<span class="co">#&gt;   3      4.936366  0.7103948  3.568594</span>
+<span class="co">#&gt;   4      4.784228  0.7275599  3.393154</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; RMSE was used to select the optimal model using  the smallest value.</span>
-<span class="co">#&gt; The final value used for the model was nvmax = 10.</span>
+<span class="co">#&gt; The final value used for the model was nvmax = 4.</span>
 
 <span class="kw">summary</span>(lflm)
 <span class="co">#&gt; Subset selection object</span>
@@ -207,19 +195,13 @@ lflm
 <span class="co">#&gt; ptratio     FALSE      FALSE</span>
 <span class="co">#&gt; b           FALSE      FALSE</span>
 <span class="co">#&gt; lstat       FALSE      FALSE</span>
-<span class="co">#&gt; 1 subsets of each size up to 10</span>
+<span class="co">#&gt; 1 subsets of each size up to 4</span>
 <span class="co">#&gt; Selection Algorithm: forward</span>
-<span class="co">#&gt;           crim zn  indus chas1 nox rm  age dis rad tax ptratio b   lstat</span>
-<span class="co">#&gt; 1  ( 1 )  &quot; &quot;  &quot; &quot; &quot; &quot;   &quot; &quot;   &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot;     &quot; &quot; &quot;*&quot;  </span>
-<span class="co">#&gt; 2  ( 1 )  &quot; &quot;  &quot; &quot; &quot; &quot;   &quot; &quot;   &quot; &quot; &quot;*&quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot;     &quot; &quot; &quot;*&quot;  </span>
-<span class="co">#&gt; 3  ( 1 )  &quot; &quot;  &quot; &quot; &quot; &quot;   &quot; &quot;   &quot; &quot; &quot;*&quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot;*&quot;     &quot; &quot; &quot;*&quot;  </span>
-<span class="co">#&gt; 4  ( 1 )  &quot; &quot;  &quot; &quot; &quot; &quot;   &quot; &quot;   &quot; &quot; &quot;*&quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot;*&quot;     &quot;*&quot; &quot;*&quot;  </span>
-<span class="co">#&gt; 5  ( 1 )  &quot; &quot;  &quot; &quot; &quot; &quot;   &quot; &quot;   &quot; &quot; &quot;*&quot; &quot; &quot; &quot;*&quot; &quot; &quot; &quot; &quot; &quot;*&quot;     &quot;*&quot; &quot;*&quot;  </span>
-<span class="co">#&gt; 6  ( 1 )  &quot; &quot;  &quot; &quot; &quot; &quot;   &quot; &quot;   &quot;*&quot; &quot;*&quot; &quot; &quot; &quot;*&quot; &quot; &quot; &quot; &quot; &quot;*&quot;     &quot;*&quot; &quot;*&quot;  </span>
-<span class="co">#&gt; 7  ( 1 )  &quot; &quot;  &quot;*&quot; &quot; &quot;   &quot; &quot;   &quot;*&quot; &quot;*&quot; &quot; &quot; &quot;*&quot; &quot; &quot; &quot; &quot; &quot;*&quot;     &quot;*&quot; &quot;*&quot;  </span>
-<span class="co">#&gt; 8  ( 1 )  &quot; &quot;  &quot;*&quot; &quot; &quot;   &quot; &quot;   &quot;*&quot; &quot;*&quot; &quot; &quot; &quot;*&quot; &quot; &quot; &quot;*&quot; &quot;*&quot;     &quot;*&quot; &quot;*&quot;  </span>
-<span class="co">#&gt; 9  ( 1 )  &quot; &quot;  &quot;*&quot; &quot; &quot;   &quot; &quot;   &quot;*&quot; &quot;*&quot; &quot; &quot; &quot;*&quot; &quot;*&quot; &quot;*&quot; &quot;*&quot;     &quot;*&quot; &quot;*&quot;  </span>
-<span class="co">#&gt; 10  ( 1 ) &quot;*&quot;  &quot;*&quot; &quot; &quot;   &quot; &quot;   &quot;*&quot; &quot;*&quot; &quot; &quot; &quot;*&quot; &quot;*&quot; &quot;*&quot; &quot;*&quot;     &quot;*&quot; &quot;*&quot;</span></code></pre></div>
+<span class="co">#&gt;          crim zn  indus chas1 nox rm  age dis rad tax ptratio b   lstat</span>
+<span class="co">#&gt; 1  ( 1 ) &quot; &quot;  &quot; &quot; &quot; &quot;   &quot; &quot;   &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot;     &quot; &quot; &quot;*&quot;  </span>
+<span class="co">#&gt; 2  ( 1 ) &quot; &quot;  &quot; &quot; &quot; &quot;   &quot; &quot;   &quot; &quot; &quot;*&quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot;     &quot; &quot; &quot;*&quot;  </span>
+<span class="co">#&gt; 3  ( 1 ) &quot; &quot;  &quot; &quot; &quot; &quot;   &quot; &quot;   &quot; &quot; &quot;*&quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot;*&quot;     &quot; &quot; &quot;*&quot;  </span>
+<span class="co">#&gt; 4  ( 1 ) &quot; &quot;  &quot; &quot; &quot; &quot;   &quot; &quot;   &quot; &quot; &quot;*&quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot;*&quot;     &quot;*&quot; &quot;*&quot;</span></code></pre></div>
 <p>Based on the RMSE results above, regression model with 10 factors(excluding indus, chas1, age) is slightly better than with all 13 factors model. Though the difference is very small, model with 10 factors is simpler.</p>
 </div>
 <div id="evaluate-the-performance-of-this-model-on-the-training-dataset." class="section level3">
