@@ -86,6 +86,32 @@ lflm
 summary(lflm)
 ```
 
-Based on the RMSE results above, regression model with 10 factors(excluding indus, chas1, age) is slightly better than with all 13 factors model. Though the difference is very small, model with 10 factors is simpler.
-
 ###3. Evaluate the performance of this model on the training dataset.
+Based on the RMSE results above, regression model with 10 factors(excluding indus, chas1, age) is slightly better than with all 13 factors model. Though the difference is very small, model with 10 factors is simpler. For a detailed evaluation, residual vs fitted plot should be drawn.
+
+```{r, fig.height= 7, fig.width= 7 }
+p_data <- as.data.frame(cbind(predict(lflm), scale(resid(lflm))))
+
+plot1 <- ggplot(p_data, aes(x = p_data[,1], y = p_data[,2])) + geom_point() +
+          geom_smooth(method = "loess", color = "red") + xlab("Fitted") +
+          ylab("Residuals") + ggtitle("Resid vs Fitted with 10 factors") +
+          theme(plot.title = element_text(hjust = 0.5))
+
+plot(plot1)
+```
+
+Above plot implies a clustering tendency of data and further investigation is needed to select a better model to fit this data. 
+
+###4. Fit a ridge regression model using ridgereg() function in mlr package.
+```{r}
+rglm <- list(type=c("Regression","Classification"),
+            library="mlr",
+            loop=NULL)
+
+rglm$parameters <- data.frame(parameter="lambda",
+                             class="numeric",
+                             label="Lambda")
+```
+
+
+
