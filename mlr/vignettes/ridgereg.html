@@ -127,7 +127,7 @@ ctrl &lt;-<span class="st"> </span><span class="kw">trainControl</span>(<span cl
   <span class="dt">repeats =</span> <span class="dv">10</span>) <span class="co"># repeat 10 times</span></code></pre></div>
 </div>
 <div id="fit-a-linear-regression-model." class="section level3">
-<h3>2-1) Fit a linear regression model.</h3>
+<h3>2-1. Fit a linear regression model.</h3>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">12345</span>)
 lm &lt;-<span class="st"> </span><span class="kw">train</span>(medv ~<span class="st"> </span>., 
             <span class="dt">data =</span> training,
@@ -151,7 +151,7 @@ lm
 <span class="co">#&gt; Tuning parameter 'intercept' was held constant at a value of TRUE</span></code></pre></div>
 </div>
 <div id="fit-a-linear-regression-model-with-forward-selection." class="section level3">
-<h3>2-2) Fit a linear regression model with forward selection.</h3>
+<h3>2-2. Fit a linear regression model with forward selection.</h3>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">12345</span>)
 lmGrid &lt;-<span class="st">  </span><span class="kw">expand.grid</span>(<span class="dt">nvmax=</span><span class="dv">1</span>:(<span class="kw">ncol</span>(training)-<span class="dv">1</span>))
 lflm &lt;-<span class="st"> </span><span class="kw">train</span>(medv ~<span class="st"> </span>., 
@@ -189,6 +189,7 @@ lflm
 <span class="co">#&gt; </span>
 <span class="co">#&gt; RMSE was used to select the optimal model using  the smallest value.</span>
 <span class="co">#&gt; The final value used for the model was nvmax = 10.</span>
+
 <span class="kw">summary</span>(lflm)
 <span class="co">#&gt; Subset selection object</span>
 <span class="co">#&gt; 13 Variables  (and intercept)</span>
@@ -219,6 +220,10 @@ lflm
 <span class="co">#&gt; 8  ( 1 )  &quot; &quot;  &quot;*&quot; &quot; &quot;   &quot; &quot;   &quot;*&quot; &quot;*&quot; &quot; &quot; &quot;*&quot; &quot; &quot; &quot;*&quot; &quot;*&quot;     &quot;*&quot; &quot;*&quot;  </span>
 <span class="co">#&gt; 9  ( 1 )  &quot; &quot;  &quot;*&quot; &quot; &quot;   &quot; &quot;   &quot;*&quot; &quot;*&quot; &quot; &quot; &quot;*&quot; &quot;*&quot; &quot;*&quot; &quot;*&quot;     &quot;*&quot; &quot;*&quot;  </span>
 <span class="co">#&gt; 10  ( 1 ) &quot;*&quot;  &quot;*&quot; &quot; &quot;   &quot; &quot;   &quot;*&quot; &quot;*&quot; &quot; &quot; &quot;*&quot; &quot;*&quot; &quot;*&quot; &quot;*&quot;     &quot;*&quot; &quot;*&quot;</span></code></pre></div>
+<p>Based on the RMSE results above, regression model with 10 factors(excluding indus, chas1, age) is slightly better than with all 13 factors model. Though the difference is very small, model with 10 factors is simpler.</p>
+</div>
+<div id="evaluate-the-performance-of-this-model-on-the-training-dataset." class="section level3">
+<h3>3. Evaluate the performance of this model on the training dataset.</h3>
 </div>
 </div>
 

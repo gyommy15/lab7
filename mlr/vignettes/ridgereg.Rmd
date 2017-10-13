@@ -38,7 +38,7 @@ In this vignette, it will be shown how to do a simple prediction problem using r
 11. PTRATIO \-\-\- pupil-teacher ratio by town
 12. B \-\-\- 1000(Bk - 0.63)^2 where Bk is the proportion of blacks by town
 13. LSTAT \-\-\- % lower status of the population
-14. MEDV \-\-\- Median value of owner-occupied homes in $1000¡¯s
+14. MEDV \-\-\- Median value of owner-occupied homes in $1000â€™s
 
 First 6 rows of the dataset are shown below:
 ```{r}
@@ -85,5 +85,7 @@ lflm
 
 summary(lflm)
 ```
+
+Based on the RMSE results above, regression model with 10 factors(excluding indus, chas1, age) is slightly better than with all 13 factors model. Though the difference is very small, model with 10 factors is simpler.
 
 ###3. Evaluate the performance of this model on the training dataset.
