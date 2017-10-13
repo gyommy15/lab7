@@ -72,18 +72,18 @@ lm
 
 ###2-2. Fit a linear regression model with forward selection.
 ```{r}
-set.seed(12345)
-lmGrid <- expand.grid(nvmax=1:(ncol(training)-1))
-lflm <- train(medv ~ ., 
-              data = training,
-              method = 'leapForward',
-              trControl = ctrl,
-              tuneGrid = lmGrid,
-              preProc = "scale")
-
-lflm
-
-summary(lflm)
+# set.seed(12345)
+# lmGrid <- expand.grid(nvmax=1:(ncol(training)-1))
+# lflm <- train(medv ~ ., 
+#               data = training,
+#               method = 'leapForward',
+#               trControl = ctrl,
+#               tuneGrid = lmGrid,
+#               preProc = "scale")
+# 
+# lflm
+# 
+# summary(lflm)
 ```
 
 Based on the RMSE results above, regression model with 10 factors(excluding indus, chas1, age) is slightly better than with all 13 factors model. Though the difference is very small, model with 10 factors is simpler.
