@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 ```{r}
 library(mlbench)
 library(caret)
-data(BostonHousing)
+data("BostonHousing")
 ```
 
 # Introduction
