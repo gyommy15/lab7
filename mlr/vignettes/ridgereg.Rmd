@@ -19,6 +19,7 @@ knitr::opts_chunk$set(
 ```{r}
 library(mlbench)
 library(caret)
+library(mlr)
 data("BostonHousing")
 ```
 
@@ -62,7 +63,7 @@ ctrl <- trainControl(method = "repeatedcv",
 ###2-1. Fit a linear regression model.
 ```{r}
 set.seed(12345)
-lm <- train(medv ~ ., 
+lm <- caret::train(medv ~ ., 
             data = training,
             method = "lm",
             trControl = ctrl,
@@ -73,12 +74,12 @@ lm
 ###2-2. Fit a linear regression model with forward selection.
 ```{r}
 set.seed(12345)
-lmGrid <- expand.grid(nvmax=1:(ncol(training)-1))
-lflm <- train(medv ~ ., 
+lflmGrid <- expand.grid(nvmax=1:(ncol(training)-1))
+lflm <- caret::train(medv ~ ., 
               data = training,
               method = "leapForward",
               trControl = ctrl,
-              tuneGrid = lmGrid,
+              tuneGrid = lflmGrid,
               preProc = "scale")
 
 lflm
@@ -104,14 +105,51 @@ Above plot implies a clustering tendency of data and further investigation is ne
 
 ###4. Fit a ridge regression model using ridgereg() function in mlr package.
 ```{r}
-rglm <- list(type=c("Regression","Classification"),
+#To use rigdereg() function
+rglm <- list(type=c("Classification", "Regression"),
             library="mlr",
-            loop=NULL)
+            loop=NULL,
+            prob=NULL)
 
-rglm$parameters <- data.frame(parameter="lambda",
-                             class="numeric",
-                             label="Lambda")
+#Parameter setting
+rglm$label<-"Ridge regression by mlr package"
+
+rglm$parameters <- data.frame(parameter = "lambda",
+                  class = "numeric",
+                  label = "lambda")
+
+rglm$fit <- function(x, y, wts, param, lev, last, classProbs, ...) { 
+  
+  rg_data <- as.data.frame(x)
+  rg_data$.outcome <- y
+  
+  rgrf <- ridgereg$new(rg_data$.outcome ~ ., data = rg_data, lambda=param$lambda, ...)
+  
+  # rgrf <- ridgereg$new(formula = formula, data = rg_data, lambda = param$lambda)
+  rgrf
+ }
+ 
+rglm$predict <- function(modelFit, newdata, preProc=NULL, submodels = NULL){
+  predict(modelFit, newdata)
+}
+
+rglm$sort  <- function(x) x[order(x$lambda),]
+
+
+rglm$grid <- function(x, y, len=NULL, search="grid"){
+  data.frame(lambda=1)
+}
 ```
 
 
+```{r}
+set.seed(12345)
+rglm_fit <- caret::train(medv ~ .,
+                  data = training,
+                  method = rglm,
+                  # trControl = ctrl,
+                  preProcess = "scale")
+
+rglm_fit
+```
 
