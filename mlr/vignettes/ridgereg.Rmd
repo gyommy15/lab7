@@ -19,7 +19,8 @@ knitr::opts_chunk$set(
 ```{r}
 library(mlbench)
 library(caret)
-library(mlr)
+require(mlr)
+library(methods)
 data("BostonHousing")
 ```
 
@@ -122,31 +123,29 @@ rglm$parameters <- data.frame(parameter = "lambda",
 rglm$fit <- function(x, y, lambda, param, lev, last, classProbs, ...) { 
   dat <- as.data.frame(x)
   
-  # respvector <- NULL
-  # respname <- NULL
-  # respnum <- NULL
-  # 
-  # for(i in 1:ncol(x)){
-  #   if(identical(y,dat[,i])){
-  #   respvector <- dat[,i]
-  #   respname <- names(x)[i]
-  #   respnum <- i
-  #   }
-  # }
-  # 
-  # formula <- paste(respname,"~", sep="")
-  # 
-  # if(ncol(x) > 1){
-  #   for(i in 1:ncol(x)-1){
-  #           formula <- paste(formula, "+", names(dat)[i], sep="")
-  #   }
-  # }
-  # 
-  # formula <- as.formula(formula)
+  respvector <- NULL
+  respname <- NULL
+  respnum <- NULL
+
+  for(i in 1:ncol(x)){
+    if(identical(y,dat[,i])){
+    respvector <- dat[,i]
+    respname <- names(x)[i]
+    respnum <- i
+    }
+  }
+
+  formula <- paste(respname,"~", sep="")
+
+  if(ncol(x) > 1){
+    for(i in 1:ncol(x)-1){
+            formula <- paste(formula, "+", names(dat)[i], sep="")
+    }
+  }
+
+  formula <- as.formula(formula)
   
-  model <- ridgereg(formula = medv ~ crim + zn + indus + chas + nox + rm + age + dis + rad + 
-    tax + ptratio + b + lstat, data=dat,lambda= param$lambda)
-  return(model)
+  mlr:::ridgereg$new(formula = formula, data=dat,lambda= param$lambda)
  }
  
 rglm$predict <- function(modelFit, newdata, preProc=NULL, submodels = NULL){
@@ -159,12 +158,12 @@ rglm$sort  <- function(x) x[order(-x$lambda),]
 
 
 rglm$grid <- function(x, y, len=NULL, search="grid"){
-  data.frame(lambda=seq(from=0, to=50, by=1))
+  data.frame(lambda=seq(from=0, to=2, by=1))
 }
 ```
 
 
-```{r}
+```{r, error=TRUE}
 set.seed(12345)
 rglm_fit <- caret::train(x = training,
                   y = training$medv,

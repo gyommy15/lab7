@@ -4,6 +4,7 @@
 #'
 #'@param formula Contains dependent and independent variables for linear regression
 #'@param data A data.frame to conduct linear regression
+#'@param lambda The ridge constant, a numeric scalar
 #'
 #'@importFrom methods new
 #'@exportClass ridgereg

@@ -9,6 +9,8 @@
 \item{formula}{Contains dependent and independent variables for linear regression}
 
 \item{data}{A data.frame to conduct linear regression}
+
+\item{lambda}{The ridge constant, a numeric scalar}
 }
 \description{
 Class for the convenient multiple ridge regression
@@ -18,7 +20,7 @@ Class for the convenient multiple ridge regression
 \describe{
 \item{\code{coef()}}{Return the coefficients as a named vector}
 
-\item{\code{predict()}}{Return the predicted values y_hat}
+\item{\code{predict(newdata = NULL)}}{Prints out the predicted values or if newdata is used, prints out predicted values for the new data set}
 
 \item{\code{print()}}{Print out the coefficients and coefficient names}
 }}

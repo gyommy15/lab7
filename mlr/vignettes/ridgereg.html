@@ -12,7 +12,7 @@
 
 <meta name="author" content="Josh Hyungyum Kim" />
 
-<meta name="date" content="2017-10-13" />
+<meta name="date" content="2017-10-14" />
 
 <title>ridgereg</title>
 
@@ -70,7 +70,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <h1 class="title toc-ignore">ridgereg</h1>
 <h4 class="author"><em>Josh Hyungyum Kim</em></h4>
-<h4 class="date"><em>2017-10-13</em></h4>
+<h4 class="date"><em>2017-10-14</em></h4>
 
 
 
@@ -78,6 +78,17 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="kw">library</span>(caret)
 <span class="co">#&gt; Loading required package: lattice</span>
 <span class="co">#&gt; Loading required package: ggplot2</span>
+<span class="kw">require</span>(mlr)
+<span class="co">#&gt; Loading required package: mlr</span>
+<span class="co">#&gt; Loading required package: ParamHelpers</span>
+<span class="co">#&gt; Warning: replacing previous import 'BBmisc::isFALSE' by</span>
+<span class="co">#&gt; 'backports::isFALSE' when loading 'mlr'</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Attaching package: 'mlr'</span>
+<span class="co">#&gt; The following object is masked from 'package:caret':</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;     train</span>
+
 <span class="kw">data</span>(<span class="st">&quot;BostonHousing&quot;</span>)</code></pre></div>
 <div id="introduction" class="section level1">
 <h1>Introduction</h1>
@@ -117,36 +128,38 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div id="divide-the-bostonhousing-data-into-a-test-and-training-dataset" class="section level3">
 <h3>1. Divide the BostonHousing data into a test and training dataset</h3>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">12345</span>)
-inTrain &lt;-<span class="st"> </span><span class="kw">createDataPartition</span>(BostonHousing$medv, <span class="dt">p =</span> .<span class="dv">8</span>, <span class="dt">list =</span> <span class="ot">FALSE</span>)
+inTrain &lt;-<span class="st"> </span><span class="kw">createDataPartition</span>(BostonHousing$medv, <span class="dt">p =</span> .<span class="dv">7</span>, <span class="dt">list =</span> <span class="ot">FALSE</span>)
 training &lt;-<span class="st"> </span>BostonHousing[ inTrain,]
 testing  &lt;-<span class="st"> </span>BostonHousing[-inTrain,]
 
 <span class="co">#For the 10-fold cross-validation</span>
-ctrl &lt;-<span class="st"> </span><span class="kw">trainControl</span>(<span class="dt">method =</span> <span class="st">&quot;repeatedcv&quot;</span>,
+ctrl &lt;-<span class="st"> </span>caret::<span class="kw">trainControl</span>(<span class="dt">method =</span> <span class="st">&quot;repeatedcv&quot;</span>,
   <span class="dt">number =</span> <span class="dv">10</span>, <span class="co"># k=10</span>
-  <span class="dt">repeats =</span> <span class="dv">10</span>) <span class="co"># repeat 10 times</span></code></pre></div>
+  <span class="dt">repeats =</span> <span class="dv">10</span>) <span class="co"># repeat 10 times</span>
+
+BostonHousing$chas &lt;-<span class="st"> </span><span class="kw">as.numeric</span>(BostonHousing$chas) -<span class="st"> </span><span class="dv">1</span>
+BostonHousing &lt;-<span class="st"> </span><span class="kw">scale</span>(BostonHousing)</code></pre></div>
 </div>
 <div id="fit-a-linear-regression-model." class="section level3">
 <h3>2-1. Fit a linear regression model.</h3>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">12345</span>)
-lm &lt;-<span class="st"> </span><span class="kw">train</span>(medv ~<span class="st"> </span>., 
+lm &lt;-<span class="st"> </span>caret::<span class="kw">train</span>(medv ~<span class="st"> </span>., 
             <span class="dt">data =</span> training,
             <span class="dt">method =</span> <span class="st">&quot;lm&quot;</span>,
-            <span class="dt">trControl =</span> ctrl,
-            <span class="dt">preProc =</span> <span class="st">&quot;scale&quot;</span>)
+            <span class="dt">trControl =</span> ctrl)
 lm
 <span class="co">#&gt; Linear Regression </span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; 407 samples</span>
+<span class="co">#&gt; 356 samples</span>
 <span class="co">#&gt;  13 predictor</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Pre-processing: scaled (13) </span>
+<span class="co">#&gt; No pre-processing</span>
 <span class="co">#&gt; Resampling: Cross-Validated (10 fold, repeated 10 times) </span>
-<span class="co">#&gt; Summary of sample sizes: 367, 366, 365, 367, 366, 367, ... </span>
+<span class="co">#&gt; Summary of sample sizes: 320, 320, 320, 320, 320, 321, ... </span>
 <span class="co">#&gt; Resampling results:</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;   RMSE      Rsquared   MAE     </span>
-<span class="co">#&gt;   4.597562  0.7481491  3.284981</span>
+<span class="co">#&gt;   5.012331  0.7140371  3.557906</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; Tuning parameter 'intercept' was held constant at a value of TRUE</span></code></pre></div>
 </div>
@@ -154,41 +167,40 @@ lm
 <h3>2-2. Fit a linear regression model with forward selection.</h3>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">12345</span>)
 lflmGrid &lt;-<span class="st"> </span><span class="kw">expand.grid</span>(<span class="dt">nvmax=</span><span class="dv">1</span>:(<span class="kw">ncol</span>(training)-<span class="dv">1</span>))
-lflm &lt;-<span class="st"> </span><span class="kw">train</span>(medv ~<span class="st"> </span>., 
+lflm &lt;-<span class="st"> </span>caret::<span class="kw">train</span>(medv ~<span class="st"> </span>., 
               <span class="dt">data =</span> training,
               <span class="dt">method =</span> <span class="st">&quot;leapForward&quot;</span>,
               <span class="dt">trControl =</span> ctrl,
-              <span class="dt">tuneGrid =</span> lflmGrid,
-              <span class="dt">preProc =</span> <span class="st">&quot;scale&quot;</span>)
+              <span class="dt">tuneGrid =</span> lflmGrid)
 
 lflm
 <span class="co">#&gt; Linear Regression with Forward Selection </span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; 407 samples</span>
+<span class="co">#&gt; 356 samples</span>
 <span class="co">#&gt;  13 predictor</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; Pre-processing: scaled (13) </span>
+<span class="co">#&gt; No pre-processing</span>
 <span class="co">#&gt; Resampling: Cross-Validated (10 fold, repeated 10 times) </span>
-<span class="co">#&gt; Summary of sample sizes: 367, 366, 365, 367, 366, 367, ... </span>
+<span class="co">#&gt; Summary of sample sizes: 320, 320, 320, 320, 320, 321, ... </span>
 <span class="co">#&gt; Resampling results across tuning parameters:</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt;   nvmax  RMSE      Rsquared   MAE     </span>
-<span class="co">#&gt;    1     6.390444  0.5197564  4.557756</span>
-<span class="co">#&gt;    2     5.340344  0.6652904  3.883566</span>
-<span class="co">#&gt;    3     4.936366  0.7103948  3.568594</span>
-<span class="co">#&gt;    4     4.784228  0.7275599  3.393154</span>
-<span class="co">#&gt;    5     4.773528  0.7283479  3.364001</span>
-<span class="co">#&gt;    6     4.630357  0.7434321  3.315285</span>
-<span class="co">#&gt;    7     4.635527  0.7425878  3.307798</span>
-<span class="co">#&gt;    8     4.677107  0.7384397  3.336058</span>
-<span class="co">#&gt;    9     4.628257  0.7443394  3.304361</span>
-<span class="co">#&gt;   10     4.594354  0.7477233  3.281964</span>
-<span class="co">#&gt;   11     4.598456  0.7480112  3.287581</span>
-<span class="co">#&gt;   12     4.598151  0.7480760  3.285110</span>
-<span class="co">#&gt;   13     4.597562  0.7481491  3.284981</span>
+<span class="co">#&gt;    1     6.374107  0.5407978  4.699421</span>
+<span class="co">#&gt;    2     5.769672  0.6248276  4.201883</span>
+<span class="co">#&gt;    3     5.369359  0.6699434  3.817078</span>
+<span class="co">#&gt;    4     5.428010  0.6624405  3.818625</span>
+<span class="co">#&gt;    5     5.190781  0.6897693  3.695211</span>
+<span class="co">#&gt;    6     5.156619  0.6940444  3.632217</span>
+<span class="co">#&gt;    7     5.150199  0.6955314  3.628006</span>
+<span class="co">#&gt;    8     5.108626  0.7010187  3.620160</span>
+<span class="co">#&gt;    9     5.086869  0.7040622  3.607101</span>
+<span class="co">#&gt;   10     5.052085  0.7085892  3.578356</span>
+<span class="co">#&gt;   11     4.979667  0.7174640  3.538078</span>
+<span class="co">#&gt;   12     5.006158  0.7147176  3.552701</span>
+<span class="co">#&gt;   13     5.012331  0.7140371  3.557906</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; RMSE was used to select the optimal model using  the smallest value.</span>
-<span class="co">#&gt; The final value used for the model was nvmax = 10.</span>
+<span class="co">#&gt; The final value used for the model was nvmax = 11.</span>
 
 <span class="kw">summary</span>(lflm)
 <span class="co">#&gt; Subset selection object</span>
@@ -207,23 +219,24 @@ lflm
 <span class="co">#&gt; ptratio     FALSE      FALSE</span>
 <span class="co">#&gt; b           FALSE      FALSE</span>
 <span class="co">#&gt; lstat       FALSE      FALSE</span>
-<span class="co">#&gt; 1 subsets of each size up to 10</span>
+<span class="co">#&gt; 1 subsets of each size up to 11</span>
 <span class="co">#&gt; Selection Algorithm: forward</span>
 <span class="co">#&gt;           crim zn  indus chas1 nox rm  age dis rad tax ptratio b   lstat</span>
 <span class="co">#&gt; 1  ( 1 )  &quot; &quot;  &quot; &quot; &quot; &quot;   &quot; &quot;   &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot;     &quot; &quot; &quot;*&quot;  </span>
 <span class="co">#&gt; 2  ( 1 )  &quot; &quot;  &quot; &quot; &quot; &quot;   &quot; &quot;   &quot; &quot; &quot;*&quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot;     &quot; &quot; &quot;*&quot;  </span>
 <span class="co">#&gt; 3  ( 1 )  &quot; &quot;  &quot; &quot; &quot; &quot;   &quot; &quot;   &quot; &quot; &quot;*&quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot;*&quot;     &quot; &quot; &quot;*&quot;  </span>
-<span class="co">#&gt; 4  ( 1 )  &quot; &quot;  &quot; &quot; &quot; &quot;   &quot; &quot;   &quot; &quot; &quot;*&quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot; &quot;*&quot;     &quot;*&quot; &quot;*&quot;  </span>
-<span class="co">#&gt; 5  ( 1 )  &quot; &quot;  &quot; &quot; &quot; &quot;   &quot; &quot;   &quot; &quot; &quot;*&quot; &quot; &quot; &quot;*&quot; &quot; &quot; &quot; &quot; &quot;*&quot;     &quot;*&quot; &quot;*&quot;  </span>
+<span class="co">#&gt; 4  ( 1 )  &quot; &quot;  &quot; &quot; &quot; &quot;   &quot; &quot;   &quot; &quot; &quot;*&quot; &quot; &quot; &quot;*&quot; &quot; &quot; &quot; &quot; &quot;*&quot;     &quot; &quot; &quot;*&quot;  </span>
+<span class="co">#&gt; 5  ( 1 )  &quot; &quot;  &quot; &quot; &quot; &quot;   &quot; &quot;   &quot;*&quot; &quot;*&quot; &quot; &quot; &quot;*&quot; &quot; &quot; &quot; &quot; &quot;*&quot;     &quot; &quot; &quot;*&quot;  </span>
 <span class="co">#&gt; 6  ( 1 )  &quot; &quot;  &quot; &quot; &quot; &quot;   &quot; &quot;   &quot;*&quot; &quot;*&quot; &quot; &quot; &quot;*&quot; &quot; &quot; &quot; &quot; &quot;*&quot;     &quot;*&quot; &quot;*&quot;  </span>
-<span class="co">#&gt; 7  ( 1 )  &quot; &quot;  &quot;*&quot; &quot; &quot;   &quot; &quot;   &quot;*&quot; &quot;*&quot; &quot; &quot; &quot;*&quot; &quot; &quot; &quot; &quot; &quot;*&quot;     &quot;*&quot; &quot;*&quot;  </span>
-<span class="co">#&gt; 8  ( 1 )  &quot; &quot;  &quot;*&quot; &quot; &quot;   &quot; &quot;   &quot;*&quot; &quot;*&quot; &quot; &quot; &quot;*&quot; &quot; &quot; &quot;*&quot; &quot;*&quot;     &quot;*&quot; &quot;*&quot;  </span>
-<span class="co">#&gt; 9  ( 1 )  &quot; &quot;  &quot;*&quot; &quot; &quot;   &quot; &quot;   &quot;*&quot; &quot;*&quot; &quot; &quot; &quot;*&quot; &quot;*&quot; &quot;*&quot; &quot;*&quot;     &quot;*&quot; &quot;*&quot;  </span>
-<span class="co">#&gt; 10  ( 1 ) &quot;*&quot;  &quot;*&quot; &quot; &quot;   &quot; &quot;   &quot;*&quot; &quot;*&quot; &quot; &quot; &quot;*&quot; &quot;*&quot; &quot;*&quot; &quot;*&quot;     &quot;*&quot; &quot;*&quot;</span></code></pre></div>
+<span class="co">#&gt; 7  ( 1 )  &quot; &quot;  &quot; &quot; &quot; &quot;   &quot; &quot;   &quot;*&quot; &quot;*&quot; &quot; &quot; &quot;*&quot; &quot;*&quot; &quot; &quot; &quot;*&quot;     &quot;*&quot; &quot;*&quot;  </span>
+<span class="co">#&gt; 8  ( 1 )  &quot; &quot;  &quot; &quot; &quot; &quot;   &quot;*&quot;   &quot;*&quot; &quot;*&quot; &quot; &quot; &quot;*&quot; &quot;*&quot; &quot; &quot; &quot;*&quot;     &quot;*&quot; &quot;*&quot;  </span>
+<span class="co">#&gt; 9  ( 1 )  &quot; &quot;  &quot; &quot; &quot; &quot;   &quot;*&quot;   &quot;*&quot; &quot;*&quot; &quot; &quot; &quot;*&quot; &quot;*&quot; &quot;*&quot; &quot;*&quot;     &quot;*&quot; &quot;*&quot;  </span>
+<span class="co">#&gt; 10  ( 1 ) &quot; &quot;  &quot;*&quot; &quot; &quot;   &quot;*&quot;   &quot;*&quot; &quot;*&quot; &quot; &quot; &quot;*&quot; &quot;*&quot; &quot;*&quot; &quot;*&quot;     &quot;*&quot; &quot;*&quot;  </span>
+<span class="co">#&gt; 11  ( 1 ) &quot;*&quot;  &quot;*&quot; &quot; &quot;   &quot;*&quot;   &quot;*&quot; &quot;*&quot; &quot; &quot; &quot;*&quot; &quot;*&quot; &quot;*&quot; &quot;*&quot;     &quot;*&quot; &quot;*&quot;</span></code></pre></div>
 </div>
 <div id="evaluate-the-performance-of-this-model-on-the-training-dataset." class="section level3">
 <h3>3. Evaluate the performance of this model on the training dataset.</h3>
-<p>Based on the RMSE results above, regression model with 10 factors(excluding indus, chas1, age) is slightly better than with all 13 factors model. Though the difference is very small, model with 10 factors is simpler. For a detailed evaluation, residual vs fitted plot should be drawn.</p>
+<p>Based on the RMSE results above, regression model with 11 factors(excluding indus, age) is slightly better than with all 13 factors model. Though the difference is very small, model with 10 factors is simpler. For a detailed evaluation, residual vs fitted plot should be drawn.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">p_data &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(<span class="kw">cbind</span>(<span class="kw">predict</span>(lflm), <span class="kw">scale</span>(<span class="kw">resid</span>(lflm))))
 
 plot1 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(p_data, <span class="kw">aes</span>(<span class="dt">x =</span> p_data[,<span class="dv">1</span>], <span class="dt">y =</span> p_data[,<span class="dv">2</span>])) +<span class="st"> </span><span class="kw">geom_point</span>() +
@@ -232,7 +245,7 @@ plot1 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(p_data, <span
 <span class="st">          </span><span class="kw">theme</span>(<span class="dt">plot.title =</span> <span class="kw">element_text</span>(<span class="dt">hjust =</span> <span class="fl">0.5</span>))
 
 <span class="kw">plot</span>(plot1)</code></pre></div>
-<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
 <p>Above plot implies a clustering tendency of data and further investigation is needed to select a better model to fit this data.</p>
 </div>
 <div id="fit-a-ridge-regression-model-using-ridgereg-function-in-mlr-package." class="section level3">
@@ -240,74 +253,676 @@ plot1 &lt;-<span class="st"> </span><span class="kw">ggplot</span>(p_data, <span
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co">#To use rigdereg() function</span>
 rglm &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">type=</span><span class="kw">c</span>(<span class="st">&quot;Classification&quot;</span>, <span class="st">&quot;Regression&quot;</span>),
             <span class="dt">library=</span><span class="st">&quot;mlr&quot;</span>,
-            <span class="dt">loop=</span><span class="ot">NULL</span>)
+            <span class="dt">loop=</span><span class="ot">NULL</span>,
+            <span class="dt">prob=</span><span class="ot">NULL</span>)
 
 <span class="co">#Parameter setting</span>
 rglm$label&lt;-<span class="st">&quot;Ridge regression by mlr package&quot;</span>
 
-prm &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">parameter =</span> <span class="st">&quot;lambda&quot;</span>,
+rglm$parameters &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="dt">parameter =</span> <span class="st">&quot;lambda&quot;</span>,
                   <span class="dt">class =</span> <span class="st">&quot;numeric&quot;</span>,
                   <span class="dt">label =</span> <span class="st">&quot;lambda&quot;</span>)
 
-rglm$parameters &lt;-<span class="st"> </span>prm
+rglm$fit &lt;-<span class="st"> </span>function(x, y, lambda, param, lev, last, classProbs, ...) { 
+  dat &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(x)
+  
+  respvector &lt;-<span class="st"> </span><span class="ot">NULL</span>
+  respname &lt;-<span class="st"> </span><span class="ot">NULL</span>
+  respnum &lt;-<span class="st"> </span><span class="ot">NULL</span>
 
-rgFit &lt;-<span class="st"> </span>function(x, y, lambda, param, lev, last, classProbs, ...) { 
-  
-  rg_data &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(x)
-  rg_data$response &lt;-<span class="st"> </span>y
-  
-  formula &lt;-<span class="st"> &quot;response ~&quot;</span>
-  formula &lt;-<span class="st"> </span><span class="kw">paste</span>(formula, <span class="kw">names</span>(rg_data)[<span class="dv">1</span>:<span class="kw">ncol</span>(x)], <span class="dt">sep =</span> <span class="st">&quot;+&quot;</span>)
+  for(i in <span class="dv">1</span>:<span class="kw">ncol</span>(x)){
+    if(<span class="kw">identical</span>(y,dat[,i])){
+    respvector &lt;-<span class="st"> </span>dat[,i]
+    respname &lt;-<span class="st"> </span><span class="kw">names</span>(x)[i]
+    respnum &lt;-<span class="st"> </span>i
+    }
+  }
+
+  formula &lt;-<span class="st"> </span><span class="kw">paste</span>(respname,<span class="st">&quot;~&quot;</span>, <span class="dt">sep=</span><span class="st">&quot;&quot;</span>)
+
+  if(<span class="kw">ncol</span>(x) &gt;<span class="st"> </span><span class="dv">1</span>){
+    for(i in <span class="dv">1</span>:<span class="kw">ncol</span>(x)-<span class="dv">1</span>){
+            formula &lt;-<span class="st"> </span><span class="kw">paste</span>(formula, <span class="st">&quot;+&quot;</span>, <span class="kw">names</span>(dat)[i], <span class="dt">sep=</span><span class="st">&quot;&quot;</span>)
+    }
+  }
+
   formula &lt;-<span class="st"> </span><span class="kw">as.formula</span>(formula)
   
-  <span class="kw">print</span>(formula)
-  
-  mlr::<span class="kw">ridgereg</span>(<span class="dt">formula =</span> formula, <span class="dt">data =</span> rg_data, <span class="dt">lambda =</span> param$lambda)
-  
-  
+  ridgereg$<span class="kw">new</span>(<span class="dt">formula =</span> formula, <span class="dt">data=</span>dat,<span class="dt">lambda=</span> param$lambda)
  }
  
-rglm$fit &lt;-<span class="st"> </span>rgFit
-
-rglm$fit
-<span class="co">#&gt; function(x, y, lambda, param, lev, last, classProbs, ...) { </span>
-<span class="co">#&gt;   </span>
-<span class="co">#&gt;   rg_data &lt;- as.data.frame(x)</span>
-<span class="co">#&gt;   rg_data$response &lt;- y</span>
-<span class="co">#&gt;   </span>
-<span class="co">#&gt;   formula &lt;- &quot;response ~&quot;</span>
-<span class="co">#&gt;   formula &lt;- paste(formula, names(rg_data)[1:ncol(x)], sep = &quot;+&quot;)</span>
-<span class="co">#&gt;   formula &lt;- as.formula(formula)</span>
-<span class="co">#&gt;   </span>
-<span class="co">#&gt;   print(formula)</span>
-<span class="co">#&gt;   </span>
-<span class="co">#&gt;   mlr::ridgereg(formula = formula, data = rg_data, lambda = param$lambda)</span>
-<span class="co">#&gt;   </span>
-<span class="co">#&gt;   </span>
-<span class="co">#&gt;  }</span>
-
-rglmPred &lt;-<span class="st"> </span>function(modelFit, newdata, <span class="dt">preProc=</span><span class="ot">NULL</span>, <span class="dt">submodels =</span> <span class="ot">NULL</span>){
-  <span class="kw">predict</span>(modelFit, newdata)
+rglm$predict &lt;-<span class="st"> </span>function(modelFit, newdata, <span class="dt">preProc=</span><span class="ot">NULL</span>, <span class="dt">submodels =</span> <span class="ot">NULL</span>){
+  if (!<span class="kw">is.data.frame</span>(newdata)) 
+    newdata &lt;-<span class="st"> </span><span class="kw">as.data.frame</span>(newdata)
+  modelFit$<span class="kw">predict</span>(newdata)
 }
 
-rglm$predict &lt;-<span class="st"> </span>rglmPred
+rglm$sort  &lt;-<span class="st"> </span>function(x) x[<span class="kw">order</span>(-x$lambda),]
 
-rglm$prob &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="ot">NULL</span>)
 
-<span class="co"># rglmSort  &lt;- function(x) x[order(x$lambda),] #??</span>
+rglm$grid &lt;-<span class="st"> </span>function(x, y, <span class="dt">len=</span><span class="ot">NULL</span>, <span class="dt">search=</span><span class="st">&quot;grid&quot;</span>){
+  <span class="kw">data.frame</span>(<span class="dt">lambda=</span><span class="kw">seq</span>(<span class="dt">from=</span><span class="dv">0</span>, <span class="dt">to=</span><span class="dv">2</span>, <span class="dt">by=</span><span class="dv">1</span>))
+}</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">12345</span>)
+rglm_fit &lt;-<span class="st"> </span>caret::<span class="kw">train</span>(<span class="dt">x =</span> training,
+                  <span class="dt">y =</span> training$medv,
+                  <span class="dt">method =</span> rglm,
+                  <span class="dt">trControl =</span> ctrl)
+<span class="co">#&gt; Warning: model fit failed for Fold01.Rep01: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold01.Rep01: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold01.Rep01: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold02.Rep01: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold02.Rep01: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold02.Rep01: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold03.Rep01: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold03.Rep01: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold03.Rep01: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold04.Rep01: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold04.Rep01: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold04.Rep01: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold05.Rep01: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold05.Rep01: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold05.Rep01: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold06.Rep01: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold06.Rep01: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold06.Rep01: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold07.Rep01: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold07.Rep01: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold07.Rep01: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold08.Rep01: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold08.Rep01: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold08.Rep01: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold09.Rep01: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold09.Rep01: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold09.Rep01: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold10.Rep01: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold10.Rep01: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold10.Rep01: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold01.Rep02: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold01.Rep02: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold01.Rep02: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold02.Rep02: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold02.Rep02: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold02.Rep02: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold03.Rep02: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold03.Rep02: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold03.Rep02: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold04.Rep02: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold04.Rep02: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold04.Rep02: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold05.Rep02: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold05.Rep02: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold05.Rep02: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold06.Rep02: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold06.Rep02: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold06.Rep02: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold07.Rep02: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold07.Rep02: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold07.Rep02: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold08.Rep02: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold08.Rep02: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold08.Rep02: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold09.Rep02: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold09.Rep02: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold09.Rep02: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold10.Rep02: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold10.Rep02: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold10.Rep02: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold01.Rep03: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold01.Rep03: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold01.Rep03: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold02.Rep03: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold02.Rep03: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold02.Rep03: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold03.Rep03: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold03.Rep03: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold03.Rep03: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold04.Rep03: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold04.Rep03: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold04.Rep03: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold05.Rep03: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold05.Rep03: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold05.Rep03: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold06.Rep03: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold06.Rep03: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold06.Rep03: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold07.Rep03: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold07.Rep03: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold07.Rep03: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold08.Rep03: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold08.Rep03: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold08.Rep03: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold09.Rep03: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold09.Rep03: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold09.Rep03: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold10.Rep03: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold10.Rep03: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold10.Rep03: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold01.Rep04: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold01.Rep04: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold01.Rep04: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold02.Rep04: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold02.Rep04: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold02.Rep04: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold03.Rep04: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold03.Rep04: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold03.Rep04: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold04.Rep04: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold04.Rep04: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold04.Rep04: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold05.Rep04: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold05.Rep04: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold05.Rep04: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold06.Rep04: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold06.Rep04: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold06.Rep04: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold07.Rep04: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold07.Rep04: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold07.Rep04: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold08.Rep04: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold08.Rep04: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold08.Rep04: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold09.Rep04: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold09.Rep04: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold09.Rep04: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold10.Rep04: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold10.Rep04: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold10.Rep04: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold01.Rep05: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold01.Rep05: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold01.Rep05: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold02.Rep05: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold02.Rep05: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold02.Rep05: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold03.Rep05: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold03.Rep05: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold03.Rep05: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold04.Rep05: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold04.Rep05: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold04.Rep05: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold05.Rep05: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold05.Rep05: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold05.Rep05: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold06.Rep05: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold06.Rep05: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold06.Rep05: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold07.Rep05: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold07.Rep05: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold07.Rep05: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold08.Rep05: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold08.Rep05: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold08.Rep05: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold09.Rep05: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold09.Rep05: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold09.Rep05: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold10.Rep05: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold10.Rep05: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold10.Rep05: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold01.Rep06: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold01.Rep06: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold01.Rep06: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold02.Rep06: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold02.Rep06: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold02.Rep06: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold03.Rep06: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold03.Rep06: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold03.Rep06: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold04.Rep06: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold04.Rep06: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold04.Rep06: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold05.Rep06: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold05.Rep06: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold05.Rep06: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold06.Rep06: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold06.Rep06: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold06.Rep06: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold07.Rep06: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold07.Rep06: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold07.Rep06: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold08.Rep06: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold08.Rep06: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold08.Rep06: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold09.Rep06: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold09.Rep06: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold09.Rep06: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold10.Rep06: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold10.Rep06: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold10.Rep06: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold01.Rep07: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold01.Rep07: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold01.Rep07: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold02.Rep07: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold02.Rep07: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold02.Rep07: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold03.Rep07: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold03.Rep07: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold03.Rep07: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold04.Rep07: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold04.Rep07: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold04.Rep07: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold05.Rep07: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold05.Rep07: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold05.Rep07: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold06.Rep07: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold06.Rep07: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold06.Rep07: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold07.Rep07: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold07.Rep07: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold07.Rep07: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold08.Rep07: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold08.Rep07: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold08.Rep07: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold09.Rep07: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold09.Rep07: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold09.Rep07: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold10.Rep07: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold10.Rep07: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold10.Rep07: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold01.Rep08: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold01.Rep08: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold01.Rep08: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold02.Rep08: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold02.Rep08: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold02.Rep08: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold03.Rep08: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold03.Rep08: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold03.Rep08: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold04.Rep08: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold04.Rep08: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold04.Rep08: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold05.Rep08: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold05.Rep08: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold05.Rep08: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold06.Rep08: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold06.Rep08: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold06.Rep08: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold07.Rep08: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold07.Rep08: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold07.Rep08: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold08.Rep08: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold08.Rep08: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold08.Rep08: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold09.Rep08: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold09.Rep08: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold09.Rep08: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold10.Rep08: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold10.Rep08: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold10.Rep08: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold01.Rep09: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold01.Rep09: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold01.Rep09: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold02.Rep09: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold02.Rep09: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold02.Rep09: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold03.Rep09: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold03.Rep09: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold03.Rep09: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold04.Rep09: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold04.Rep09: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold04.Rep09: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold05.Rep09: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold05.Rep09: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold05.Rep09: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold06.Rep09: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold06.Rep09: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold06.Rep09: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold07.Rep09: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold07.Rep09: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold07.Rep09: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold08.Rep09: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold08.Rep09: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold08.Rep09: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold09.Rep09: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold09.Rep09: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold09.Rep09: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold10.Rep09: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold10.Rep09: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold10.Rep09: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold01.Rep10: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold01.Rep10: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold01.Rep10: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold02.Rep10: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold02.Rep10: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold02.Rep10: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold03.Rep10: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold03.Rep10: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold03.Rep10: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold04.Rep10: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold04.Rep10: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold04.Rep10: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold05.Rep10: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold05.Rep10: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold05.Rep10: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold06.Rep10: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold06.Rep10: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold06.Rep10: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold07.Rep10: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold07.Rep10: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold07.Rep10: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold08.Rep10: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold08.Rep10: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold08.Rep10: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold09.Rep10: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold09.Rep10: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold09.Rep10: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold10.Rep10: lambda=0 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold10.Rep10: lambda=1 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning: model fit failed for Fold10.Rep10: lambda=2 Error in method$fit(x = x, y = y, wts = wts, param = tuneValue, lev = obsLevels,  : </span>
+<span class="co">#&gt;   객체 'ridgereg'를 찾을 수 없습니다</span>
+<span class="co">#&gt; Warning in nominalTrainWorkflow(x = x, y = y, wts = weights, info =</span>
+<span class="co">#&gt; trainInfo, : There were missing values in resampled performance measures.</span>
+<span class="co">#&gt; Something is wrong; all the RMSE metric values are missing:</span>
+<span class="co">#&gt;       RMSE        Rsquared        MAE     </span>
+<span class="co">#&gt;  Min.   : NA   Min.   : NA   Min.   : NA  </span>
+<span class="co">#&gt;  1st Qu.: NA   1st Qu.: NA   1st Qu.: NA  </span>
+<span class="co">#&gt;  Median : NA   Median : NA   Median : NA  </span>
+<span class="co">#&gt;  Mean   :NaN   Mean   :NaN   Mean   :NaN  </span>
+<span class="co">#&gt;  3rd Qu.: NA   3rd Qu.: NA   3rd Qu.: NA  </span>
+<span class="co">#&gt;  Max.   : NA   Max.   : NA   Max.   : NA  </span>
+<span class="co">#&gt;  NA's   :3     NA's   :3     NA's   :3</span>
+<span class="co">#&gt; Error: Stopping</span>
 
-<span class="co"># rglm$sort &lt;- rglmSort</span>
-
-<span class="co"># rglm$grid &lt;- function(x, y, len=NULL, search=&quot;grid&quot;){</span>
-<span class="co">#   data.frame(lambda=seq(from=0, to=500, by=10))</span>
-<span class="co"># }</span>
-<span class="co"># </span>
-<span class="co"># set.seed(12345)</span>
-<span class="co"># rglm_fit &lt;- train(medv ~ ., data = training,</span>
-<span class="co">#                   method = rglm,</span>
-<span class="co">#                   trControl = ctrl)</span>
-<span class="co"># </span>
-<span class="co"># rglm_fit</span></code></pre></div>
+rglm_fit
+<span class="co">#&gt; Error in eval(expr, envir, enclos): 객체 'rglm_fit'를 찾을 수 없습니다</span></code></pre></div>
 </div>
 </div>
 
