@@ -24,6 +24,103 @@ library(methods)
 data("BostonHousing")
 ```
 
+```{r, echo=FALSE, eval=TRUE}
+ridgereg <- setRefClass("ridgereg", 
+                        fields = list(formula="formula",
+                                      data="data.frame",
+                                      reg_coe="matrix",
+                                      fit_val="matrix",
+                                      data_name="character",
+                                      lambda="numeric"),
+                        
+                        methods = list(
+                          initialize = function(formula, data, lambda=0){
+                            
+                            formula <<- formula
+                            data <<- data
+                            lambda <<- lambda
+                            
+                            data_name <<- deparse(substitute(data))
+                            
+                            #getting y variable from the formula
+                            get_y <- all.vars(formula)[1]
+                            
+                            #defining X and y
+                            y <- data[[get_y]]
+                            X <- model.matrix(formula, data)
+                            
+                            #Normalize
+                            p <- ncol(X)
+                            X <- cbind(X[,1], scale(X[,-1]))
+                            
+                            #Ridge regression
+                            # reg_coe <<- solve(t(X)%*%X+lambda*diag(p)) %*% t(X)%*%y
+                            # dimnames(reg_coe) <<- list(c("(Intercept)", all.vars(formula)[-1]), NULL)
+
+                            # fit_val <<- X%*%reg_coe
+                            
+                            #QR Decomposition
+                            y<-as.matrix(data[get_y],ncol=1)
+                            X_qr<-rbind(X,sqrt(lambda)*diag(p))
+                            y_qr<-rbind(y,matrix(data = 0, nrow = p, ncol = 1))
+                            
+                            QR <- qr((X_qr))
+                            Q <- qr.Q(QR)
+                            R <- qr.R(QR)
+                            
+                            reg_coe <<- qr.solve(R) %*% t(Q) %*% as.matrix(y_qr)
+                            dimnames(reg_coe) <<- list(c("(Intercept)", all.vars(formula)[-1]), NULL)
+                            
+                            fit_val <<- X %*% reg_coe
+                          },
+                          
+                          results = function(){
+                            results <- list()
+                            
+                            results$coef <- reg_coe
+                            results$fitted <- fit_val
+                            return(results)
+                            
+                          },
+                          
+                          print = function(){
+                            "Print out the coefficients and coefficient names"
+                            
+                            cat("Call: \n ")
+                            cat(paste0("ridgereg(formula = ",format(formula),", data = ",data_name,", lambda = ",lambda,")\n\n"))
+                            cat("Coefficients: \n")
+                            cat(" ",row.names(reg_coe), "\n    ", sep = "  ")
+                            cat(t(reg_coe[,1]), sep="    ")
+                            
+                          },
+                          
+                          
+                          predict = function(newdata=NULL){ #if newdata is used, it should be a data frame
+                            "Prints out the predicted values or if newdata is used, prints out predicted values for the new data set"
+                            
+                            if(is.null(newdata)){
+                              result <- structure(c(results()[[2]]), names=(1:length(results()[[2]])))
+                            } else{
+                              X<-model.matrix(object=formula, data=newdata)
+                              X[,2:ncol(X)] <- scale(X[,-1])
+                              result <- (X %*% results()[[1]])[,1]
+                            }
+                            return(result)
+                          },
+                          
+                          # predict = function(){
+                          #   "Return the predicted values y_hat"
+                          #   return(fit_val)
+                          # },
+                          
+                          coef = function(){
+                            "Return the coefficients as a named vector"
+                            return(reg_coe)
+                          }
+                        )
+)
+```
+
 # Introduction
 In this vignette, it will be shown how to do a simple prediction problem using ridgereg() function in the package "mlr" with the data _BostonHousing_ found in the mlbench package. The dataset consists of 506 observations of 14 variables. The median value of house price in $1000s, denoted by MEDV, is the outcome or the target variable in our model. Below is a brief description of each feature and the outcome in our dataset:
 
@@ -106,7 +203,7 @@ plot(plot1)
 Above plot implies a clustering tendency of data and further investigation is needed to select a better model to fit this data. 
 
 ###4. Fit a ridge regression model using ridgereg() function in mlr package.
-```{r}
+```{r, warning=FALSE}
 #To use rigdereg() function
 rglm <- list(type=c("Classification", "Regression"),
             library="mlr",
@@ -145,7 +242,7 @@ rglm$fit <- function(x, y, lambda, param, lev, last, classProbs, ...) {
 
   formula <- as.formula(formula)
   
-  mlr:::ridgereg$new(formula = formula, data=dat,lambda= param$lambda)
+  ridgereg$new(formula = formula, data=dat,lambda= param$lambda)
  }
  
 rglm$predict <- function(modelFit, newdata, preProc=NULL, submodels = NULL){
@@ -158,12 +255,9 @@ rglm$sort  <- function(x) x[order(-x$lambda),]
 
 
 rglm$grid <- function(x, y, len=NULL, search="grid"){
-  data.frame(lambda=seq(from=0, to=2, by=1))
+  data.frame(lambda=seq(from=0, to=5, by=1))
 }
-```
 
-
-```{r, error=TRUE}
 set.seed(12345)
 rglm_fit <- caret::train(x = training,
                   y = training$medv,
