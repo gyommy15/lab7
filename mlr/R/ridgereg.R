@@ -60,6 +60,15 @@ ridgereg <- setRefClass("ridgereg",
                             fit_val <<- X %*% reg_coe
                           },
                           
+                          results = function(){
+                            results <- list()
+                            
+                            results$coef <- reg_coe
+                            results$fitted <- fit_val
+                            return(results)
+                            
+                          },
+                          
                           print = function(){
                             "Print out the coefficients and coefficient names"
                             
@@ -71,10 +80,24 @@ ridgereg <- setRefClass("ridgereg",
                             
                           },
                           
-                          predict = function(){
-                            "Return the predicted values y_hat"
-                            return(fit_val)
+                          
+                          predict = function(newdata=NULL){ #if newdata is used, it should be a data frame
+                            "Prints out the predicted values or if newdata is used, prints out predicted values for the new data set"
+                            
+                            if(is.null(newdata)){
+                              result <- structure(c(results()[[2]]), names=(1:length(results()[[2]])))
+                            } else{
+                              X<-model.matrix(object=formula, data=newdata)
+                              X[,2:ncol(X)] <- scale(X[,-1])
+                              result <- (X %*% results()[[1]])[,1]
+                            }
+                            return(result)
                           },
+                          
+                          # predict = function(){
+                          #   "Return the predicted values y_hat"
+                          #   return(fit_val)
+                          # },
                           
                           coef = function(){
                             "Return the coefficients as a named vector"
