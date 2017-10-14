@@ -197,7 +197,7 @@ p_data <- as.data.frame(cbind(predict(lflm), scale(resid(lflm))))
 
 plot1 <- ggplot(p_data, aes(x = p_data[,1], y = p_data[,2])) + geom_point() +
           geom_smooth(method = "loess", color = "red") + xlab("Fitted") +
-          ylab("Residuals") + ggtitle("Resid vs Fitted with 10 factors") +
+          ylab("Residuals") + ggtitle("Resid vs Fitted with 11 factors") +
           theme(plot.title = element_text(hjust = 0.5))
 
 plot(plot1)
