@@ -156,7 +156,10 @@ testing  <- BostonHousing[-inTrain,]
 ctrl <- caret::trainControl(method = "repeatedcv",
   number = 10, # k=10
   repeats = 10) # repeat 10 times
+```
+For future analysis, we standardize all predictors. The factor variable chas contains only two classes, so no dummies are needed and we may convert it into a usual numeric variable.
 
+```{r}
 BostonHousing$chas <- as.numeric(BostonHousing$chas) - 1
 BostonHousing <- scale(BostonHousing)
 ```
@@ -202,7 +205,7 @@ plot(plot1)
 
 Above plot implies a clustering tendency of data and further investigation is needed to select a better model to fit this data. 
 
-###4. Fit a ridge regression model using ridgereg() function in mlr package.
+###4~5. Fit a ridge regression model using ridgereg() function in mlr package and finding a best parameter lambda using 10-fold cross-validation on the training set.
 ```{r, warning=FALSE}
 #To use rigdereg() function
 rglm <- list(type=c("Classification", "Regression"),
@@ -266,3 +269,18 @@ rglm_fit <- caret::train(x = training,
 
 rglm_fit
 ```
+With the caret package and ridgereg() function, ridge regression model is fitted to the training data. For the different values of lambda, 10-fold cross-validation is used to find the best hyperparameter value. As seen above, final value used for the model is lambda = 3. 
+
+###6. Evaluate the performance of all three models
+```{r}
+#Linear regression
+lm$results[,1:4]
+
+#Regression with forward selection
+lflm$results[11,1:4]
+
+#Ridge regression
+rglm_fit$results[4,1:4]
+```
+As shown above, regression with forward selection model has the lowest RMSE and MAE and highest Rsquared value. It means that this model is the best model among those 3 models. However, all 3 models show more or less the same values. In this case, most simple model could be selected. 
+
